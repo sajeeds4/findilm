@@ -1,0 +1,57 @@
+{
+  "entities": {
+    "users": {
+      "title": "User Profile",
+      "description": "Stores user profile information and preferences.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "The unique ID of the user." },
+        "displayName": { "type": "string", "description": "The name displayed in the app." },
+        "email": { "type": "string", "description": "The user's email address." },
+        "photoURL": { "type": "string", "description": "The user's profile picture URL." },
+        "role": { "type": "string", "enum": ["admin", "user"], "description": "The user's role." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the account was created." }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "reflections": {
+      "title": "Reflection Journal",
+      "description": "Private journal entries for spiritual reflection.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "The ID of the user who wrote the reflection." },
+        "content": { "type": "string", "description": "The text of the reflection." },
+        "isPublic": { "type": "boolean", "description": "Whether the reflection is shared with the community." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the reflection was written." }
+      },
+      "required": ["uid", "content", "createdAt"]
+    },
+    "duaRequests": {
+      "title": "Dua Request",
+      "description": "Community dua requests.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "The ID of the user who submitted the request." },
+        "content": { "type": "string", "description": "The text of the dua request." },
+        "isAnonymous": { "type": "boolean", "description": "Whether the request is anonymous." },
+        "ameenCount": { "type": "integer", "description": "Number of people who said Ameen." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the request was submitted." }
+      },
+      "required": ["content", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "users",
+      "description": "User profile document."
+    },
+    "/reflections/{reflectionId}": {
+      "schema": "reflections",
+      "description": "Individual reflection entries."
+    },
+    "/duaRequests/{requestId}": {
+      "schema": "duaRequests",
+      "description": "Community dua requests."
+    }
+  }
+}

@@ -1,0 +1,119 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: {userId}
+    // Fields:
+    //   - uid: string (required) - The unique ID of the user.
+    //   - displayName: string (optional) - The name displayed in the app.
+    //   - email: string (required) - The user's email address.
+    //   - photoURL: string (optional) - The user's profile picture URL.
+    //   - role: string (required, enum: ['admin', 'user']) - The user's role.
+    //   - createdAt: timestamp (required) - When the account was created.
+    //
+    // Collection: reflections
+    // Document ID: {reflectionId}
+    // Fields:
+    //   - uid: string (required) - The ID of the user who wrote the reflection.
+    //   - content: string (required, size < 5000) - The text of the reflection.
+    //   - isPublic: bool (required) - Whether the reflection is shared.
+    //   - createdAt: timestamp (required) - When the reflection was written.
+    //
+    // Collection: duaRequests
+    // Document ID: {requestId}
+    // Fields:
+    //   - uid: string (optional) - The ID of the user who submitted the request.
+    //   - content: string (required, size < 1000) - The text of the dua request.
+    //   - isAnonymous: bool (required) - Whether the request is anonymous.
+    //   - ameenCount: int (required) - Number of people who said Ameen.
+    //   - createdAt: timestamp (required) - When the request was submitted.
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isDocOwner() {
+      return isAuthenticated() && request.auth.uid == resource.data.uid;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && 
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+         (request.auth.token.email == "gmsit4155@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    // ===============================================================
+    // Collection Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      function isValidUser(data) {
+        return data.uid is string &&
+               data.email is string && isValidEmail(data.email) &&
+               data.role in ['admin', 'user'] &&
+               (!('displayName' in data) || (data.displayName is string && data.displayName.size() < 100)) &&
+               (!('photoURL' in data) || (data.photoURL is string && data.photoURL.size() < 500));
+      }
+
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isAuthenticated() && isOwner(userId) && isValidUser(request.resource.data) && (request.resource.data.role == 'user' || isAdmin());
+      allow update: if isAuthenticated() && isOwner(userId) && isValidUser(request.resource.data) && (request.resource.data.role == resource.data.role || isAdmin());
+    }
+
+    match /reflections/{reflectionId} {
+      function isValidReflection(data) {
+        return data.uid is string &&
+               data.content is string && data.content.size() < 5000 &&
+               data.isPublic is bool &&
+               data.createdAt is timestamp;
+      }
+
+      allow read: if isDocOwner() || (resource.data.isPublic == true) || isAdmin();
+      allow create: if isAuthenticated() && request.auth.uid == request.resource.data.uid && isValidReflection(request.resource.data);
+      allow update: if isAuthenticated() && isDocOwner() && isValidReflection(request.resource.data) && request.resource.data.uid == resource.data.uid;
+      allow delete: if isAuthenticated() && (isDocOwner() || isAdmin());
+    }
+
+    match /duaRequests/{requestId} {
+      function isValidDua(data) {
+        return data.content is string && data.content.size() < 1000 &&
+               data.isAnonymous is bool &&
+               data.ameenCount is int &&
+               data.createdAt is timestamp;
+      }
+
+      allow read: if true; // Community requests are public
+      allow create: if isAuthenticated() && isValidDua(request.resource.data);
+      allow update: if isAuthenticated() && (
+        // Allow anyone to increment ameenCount
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['ameenCount']) && 
+         request.resource.data.ameenCount == resource.data.ameenCount + 1) ||
+        // Allow owner or admin to update full doc
+        (isDocOwner() || isAdmin())
+      );
+      allow delete: if isAuthenticated() && (isDocOwner() || isAdmin());
+    }
+  }
+}

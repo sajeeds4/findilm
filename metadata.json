@@ -1,0 +1,9 @@
+{
+  "name": "FindIlm",
+  "description": "A comprehensive Islamic knowledge platform featuring Qur’an studies, prayer tools, learning paths, and AI-powered spiritual assistance.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ]
+}
