@@ -1,262 +1,402 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Mail, Lock, User, ArrowRight, Chrome, ShieldCheck, Sparkles, Loader2, CheckCircle2, Globe, Heart, BookOpen } from 'lucide-react';
-import { auth, googleProvider, signInWithPopup } from '../firebase';
+import {
+  ArrowRight,
+  BookOpen,
+  CheckCircle2,
+  Globe,
+  Heart,
+  Loader2,
+  Lock,
+  Mail,
+  ShieldCheck,
+  Sparkles,
+  Users,
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../AuthContext';
+
+type JoinGoal = 'community' | 'learning' | 'support' | 'private';
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
+  const [displayName, setDisplayName] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [joinGoal, setJoinGoal] = useState<JoinGoal>('community');
+  const [signupStep, setSignupStep] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { login, register } = useAuth();
 
-  const handleGoogleSignIn = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      await signInWithPopup(auth, googleProvider);
-      navigate('/');
-    } catch (error) {
-      console.error("Auth error:", error);
-      setError("Failed to sign in with Google.");
-    } finally {
-      setLoading(false);
+  const stepReady = useMemo(() => {
+    if (signupStep === 1) {
+      return displayName.trim().length > 1;
     }
-  };
+    return email.trim() && password.trim() && password === confirmPassword;
+  }, [signupStep, displayName, email, password, confirmPassword]);
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    
+
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        navigate('/');
+      if (isLogin) {
+        await login(email, password);
       } else {
-        setError(data.message || "Authentication failed.");
+        if (password !== confirmPassword) {
+          throw new Error('Passwords do not match.');
+        }
+        await register(email, password, displayName);
       }
+      navigate('/');
     } catch (err) {
-      setError("Server connection failed. Please try again later.");
+      setError(err instanceof Error ? err.message : 'Authentication failed.');
     } finally {
       setLoading(false);
     }
   };
 
+  const joinGoals = [
+    {
+      id: 'community' as const,
+      title: 'Join private sister circles',
+      body: 'I want conversations, belonging, and women who understand my context.',
+      icon: Users,
+    },
+    {
+      id: 'learning' as const,
+      title: 'Build a steadier learning life',
+      body: 'I want structured courses, resources, and a consistent study rhythm.',
+      icon: BookOpen,
+    },
+    {
+      id: 'support' as const,
+      title: 'Find support and gentle care',
+      body: 'I need dua, reflection, encouragement, and emotionally safe spaces.',
+      icon: Heart,
+    },
+    {
+      id: 'private' as const,
+      title: 'Use a calmer, safer platform',
+      body: 'I want a more private-feeling alternative to open social media spaces.',
+      icon: ShieldCheck,
+    },
+  ];
+
   return (
-    <div className="min-h-[90vh] flex items-center justify-center px-4 py-20 relative overflow-hidden">
-      {/* Background Decorative Elements */}
-      <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden -z-10">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-brand-500/5 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-500/5 rounded-full blur-[120px]" />
+    <div className="relative min-h-[92vh] overflow-hidden px-4 py-16">
+      <div className="absolute inset-0 -z-10 bg-[linear-gradient(135deg,#fff6f8_0%,#fffbf4_48%,#f4fbf8_100%)]" />
+      <div className="absolute inset-0 -z-10 pointer-events-none">
+        <div className="absolute left-[-8%] top-[8%] h-80 w-80 rounded-full bg-rose-200/45 blur-[130px]" />
+        <div className="absolute right-[-10%] top-[14%] h-[26rem] w-[26rem] rounded-full bg-emerald-200/35 blur-[130px]" />
+        <div className="absolute bottom-[-12%] left-[28%] h-[30rem] w-[30rem] rounded-full bg-amber-100/55 blur-[150px]" />
       </div>
 
-      <div className="max-w-7xl w-full grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-        {/* Left Side: Content */}
-        <div className="hidden lg:block space-y-12">
-          <div className="space-y-6">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-50 text-brand-600 text-xs font-bold uppercase tracking-widest border border-brand-100"
-            >
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 lg:grid-cols-[1.05fr_0.95fr]">
+        <div className="hidden lg:flex flex-col justify-between rounded-[4rem] bg-[linear-gradient(155deg,#111827_0%,#1f1631_58%,#0d1720_100%)] p-12 text-white shadow-[0_40px_100px_-25px_rgba(15,23,42,0.45)]">
+          <div className="space-y-8">
+            <div className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/8 px-5 py-3 text-xs font-bold uppercase tracking-[0.2em] text-rose-300 backdrop-blur-xl">
               <Sparkles size={14} />
-              <span>Join 12,000+ Seekers Worldwide</span>
-            </motion.div>
-            
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="text-7xl font-display font-bold text-slate-900 leading-[1.1]"
-            >
-              Start Your <br />
-              <span className="text-brand-600 italic relative">
-                Spiritual Legacy
-                <svg className="absolute -bottom-2 left-0 w-full h-3 text-brand-200 -z-10" viewBox="0 0 100 10" preserveAspectRatio="none">
-                  <path d="M0 5 Q 25 0, 50 5 T 100 5" fill="none" stroke="currentColor" strokeWidth="8" />
-                </svg>
-              </span>
-            </motion.h1>
-            
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="text-xl text-slate-500 leading-relaxed max-w-lg"
-            >
-              Create an account to track your progress, save your favorite verses, and connect with a global community of knowledge seekers.
-            </motion.p>
-          </div>
-          
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="grid grid-cols-2 gap-8"
-          >
-            {[
-              { icon: <BookOpen size={20} />, title: "Personalized Paths", desc: "Tailored learning" },
-              { icon: <Globe size={20} />, title: "Global Community", desc: "Connect with others" },
-              { icon: <Heart size={20} />, title: "Dua Support", desc: "Ask and give Ameens" },
-              { icon: <ShieldCheck size={20} />, title: "Private Space", desc: "Safe and moderated" }
-            ].map((feature, idx) => (
-              <div key={idx} className="space-y-3 p-6 bg-white border border-slate-100 rounded-[2rem] shadow-xl shadow-slate-200/30 hover:border-brand-500 transition-all group">
-                <div className="w-12 h-12 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center group-hover:bg-brand-600 group-hover:text-white transition-all">
-                  {feature.icon}
-                </div>
-                <div>
-                  <div className="font-bold text-slate-900">{feature.title}</div>
-                  <div className="text-xs text-slate-400 font-medium">{feature.desc}</div>
-                </div>
-              </div>
-            ))}
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            className="flex items-center gap-4 pt-4"
-          >
-            <div className="flex -space-x-3">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="w-10 h-10 rounded-full border-4 border-white bg-slate-100 flex items-center justify-center overflow-hidden">
-                  <img src={`https://ui-avatars.com/api/?name=User${i}&background=random`} alt="User" />
-                </div>
-              ))}
+              Member Onboarding
             </div>
-            <div className="text-sm font-bold text-slate-400">
-              <span className="text-brand-600">4.9/5</span> rating from our community
-            </div>
-          </motion.div>
-        </div>
-
-        {/* Right Side: Form */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="bg-white border border-slate-200 rounded-[4rem] p-10 md:p-16 shadow-2xl shadow-slate-200/50 relative"
-        >
-          <div className="absolute top-10 right-10 text-slate-50 -z-0">
-            <Sparkles size={120} />
-          </div>
-
-          <div className="relative z-10">
-            <div className="text-center mb-12 space-y-4">
-              <h2 className="text-4xl font-display font-bold text-slate-900">
-                {isLogin ? 'Welcome Back' : 'Create Account'}
-              </h2>
-              <p className="text-slate-500 text-lg">
-                {isLogin ? 'Sign in to continue your journey.' : 'Join us and start growing today.'}
+            <div className="space-y-5">
+              <h1 className="text-6xl font-display font-bold leading-[0.94]">
+                Join a calmer digital space for Muslim women
+              </h1>
+              <p className="max-w-xl text-xl leading-relaxed text-slate-300">
+                This onboarding should feel like entering a serious platform: thoughtful, safe, and intentionally designed for belonging, learning, and support.
               </p>
             </div>
+          </div>
 
-            <div className="space-y-8">
-              <button 
-                onClick={handleGoogleSignIn}
-                disabled={loading}
-                className="w-full flex items-center justify-center gap-4 bg-white border border-slate-200 py-5 rounded-[1.5rem] font-bold text-slate-700 hover:bg-slate-50 hover:border-brand-500 transition-all disabled:opacity-50 group shadow-sm"
-              >
-                <Chrome size={24} className="text-brand-600 group-hover:scale-110 transition-transform" />
-                Continue with Google
-              </button>
-
-              <div className="relative py-2">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-slate-100"></div>
+          <div className="space-y-6">
+            {[
+              'Moderated circles for sensitive and meaningful discussion',
+              'Courses, saved resources, audio, reflection, and support in one member account',
+              'A private-feeling alternative to open, noisy social media spaces',
+            ].map((item) => (
+              <div key={item} className="flex items-start gap-4 rounded-[2rem] border border-white/8 bg-white/6 p-5">
+                <div className="mt-0.5 flex h-10 w-10 items-center justify-center rounded-2xl bg-white/10 text-rose-300">
+                  <CheckCircle2 size={18} />
                 </div>
-                <div className="relative flex justify-center text-[10px] uppercase tracking-[0.2em] font-bold">
-                  <span className="px-6 bg-white text-slate-400">Or use email</span>
+                <p className="text-slate-300">{item}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            {[
+              ['12k+', 'Women reached'],
+              ['340+', 'Course joiners'],
+              ['24', 'Active discussion rooms'],
+              ['4.9/5', 'Community trust rating'],
+            ].map(([value, label]) => (
+              <div key={label} className="rounded-[1.8rem] border border-white/8 bg-white/6 p-5">
+                <div className="text-3xl font-bold text-white">{value}</div>
+                <div className="mt-2 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">{label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.97 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="overflow-hidden rounded-[4rem] border border-white/80 bg-white/80 shadow-[0_35px_90px_-20px_rgba(15,23,42,0.16)] backdrop-blur-xl"
+        >
+          <div className="grid gap-0 lg:grid-cols-[0.88fr_1.12fr]">
+            {!isLogin && (
+              <div className="border-b border-slate-100 bg-[linear-gradient(180deg,#fff9fb_0%,#fff 100%)] p-8 lg:border-b-0 lg:border-r">
+                <div className="space-y-6">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-rose-600">Step {signupStep} of 2</p>
+                    <h2 className="mt-2 text-3xl font-display font-bold text-slate-900">
+                      {signupStep === 1 ? 'Tell us how you want to use the platform' : 'Create your secure account'}
+                    </h2>
+                  </div>
+
+                  <div className="flex gap-3">
+                    {[1, 2].map((step) => (
+                      <div key={step} className={`h-2 flex-1 rounded-full ${signupStep >= step ? 'bg-rose-500' : 'bg-slate-100'}`} />
+                    ))}
+                  </div>
+
+                  {signupStep === 1 ? (
+                    <div className="space-y-4">
+                      <label className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">What should your account help you do first?</label>
+                      <div className="space-y-3">
+                        {joinGoals.map((goal) => (
+                          <button
+                            key={goal.id}
+                            type="button"
+                            onClick={() => setJoinGoal(goal.id)}
+                            className={`w-full rounded-[1.8rem] border p-4 text-left transition-all ${
+                              joinGoal === goal.id ? 'border-rose-300 bg-rose-50 shadow-sm' : 'border-slate-200 bg-white hover:border-rose-200'
+                            }`}
+                          >
+                            <div className="flex items-start gap-4">
+                              <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${joinGoal === goal.id ? 'bg-rose-600 text-white' : 'bg-slate-100 text-slate-500'}`}>
+                                <goal.icon size={20} />
+                              </div>
+                              <div>
+                                <div className="font-bold text-slate-900">{goal.title}</div>
+                                <div className="mt-1 text-sm text-slate-500">{goal.body}</div>
+                              </div>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">What should sisters call you?</label>
+                        <input
+                          type="text"
+                          value={displayName}
+                          onChange={(e) => setDisplayName(e.target.value)}
+                          placeholder="e.g. Sumaiya Rahman"
+                          className="w-full rounded-[1.5rem] border border-slate-200 bg-white px-5 py-4 font-medium text-slate-700 outline-none focus:border-rose-300"
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="rounded-[1.8rem] bg-slate-50 p-5">
+                        <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-rose-600">Chosen onboarding direction</div>
+                        <div className="mt-2 text-lg font-bold text-slate-900">
+                          {joinGoals.find((goal) => goal.id === joinGoal)?.title}
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Email Address</label>
+                        <div className="relative">
+                          <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                          <input
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="name@example.com"
+                            className="w-full rounded-[1.5rem] border border-slate-200 bg-white py-4 pl-14 pr-5 font-medium text-slate-700 outline-none focus:border-rose-300"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Password</label>
+                        <div className="relative">
+                          <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                          <input
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="Create a strong password"
+                            className="w-full rounded-[1.5rem] border border-slate-200 bg-white py-4 pl-14 pr-5 font-medium text-slate-700 outline-none focus:border-rose-300"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Confirm Password</label>
+                        <input
+                          type="password"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          placeholder="Repeat your password"
+                          className="w-full rounded-[1.5rem] border border-slate-200 bg-white px-5 py-4 font-medium text-slate-700 outline-none focus:border-rose-300"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex gap-3">
+                    {signupStep === 2 && (
+                      <button
+                        type="button"
+                        onClick={() => setSignupStep(1)}
+                        className="rounded-[1.4rem] border border-slate-200 px-6 py-3 font-bold text-slate-600"
+                      >
+                        Back
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      disabled={!stepReady}
+                      onClick={() => signupStep === 1 && setSignupStep(2)}
+                      className={`rounded-[1.4rem] px-6 py-3 font-bold ${signupStep === 1 ? 'bg-slate-950 text-white disabled:opacity-40' : 'hidden'}`}
+                    >
+                      Continue
+                    </button>
+                  </div>
                 </div>
               </div>
+            )}
 
-              <AnimatePresence mode="wait">
-                {error && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="p-5 bg-rose-50 border border-rose-100 text-rose-600 rounded-2xl text-sm font-bold flex items-center gap-3"
-                  >
-                    <div className="w-6 h-6 rounded-full bg-rose-100 flex items-center justify-center">!</div>
-                    {error}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              <form onSubmit={handleEmailAuth} className="space-y-6">
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-4">Email Address</label>
-                  <div className="relative group">
-                    <Mail className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-600 transition-colors" size={20} />
-                    <input 
-                      type="email" 
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="e.g. seeker@findilm.com"
-                      required
-                      className="w-full pl-16 pr-6 py-5 bg-slate-50 border border-slate-200 rounded-[1.5rem] focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 outline-none transition-all font-medium text-slate-700"
-                    />
+            <div className="p-8 md:p-12">
+              <div className="space-y-8">
+                <div className="space-y-4 text-center">
+                  <div className="inline-flex items-center gap-2 rounded-full bg-rose-50 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.18em] text-rose-600">
+                    {isLogin ? 'Member Sign In' : 'Account Creation'}
                   </div>
+                  <h2 className="text-4xl font-display font-bold text-slate-900">
+                    {isLogin ? 'Welcome back to your private sisterhood space' : 'Complete your onboarding'}
+                  </h2>
+                  <p className="mx-auto max-w-xl text-lg leading-relaxed text-slate-500">
+                    {isLogin
+                      ? 'Sign in to continue into your discussions, courses, saved resources, and reflections.'
+                      : 'Your account gives you access to community rooms, learning paths, support spaces, and a calmer online experience.'}
+                  </p>
                 </div>
 
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center ml-4">
-                    <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Password</label>
-                    {isLogin && (
-                      <button type="button" className="text-[10px] font-bold text-brand-600 uppercase tracking-widest hover:underline">Forgot?</button>
-                    )}
-                  </div>
-                  <div className="relative group">
-                    <Lock className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-600 transition-colors" size={20} />
-                    <input 
-                      type="password" 
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••"
-                      required
-                      className="w-full pl-16 pr-6 py-5 bg-slate-50 border border-slate-200 rounded-[1.5rem] focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 outline-none transition-all font-medium text-slate-700"
-                    />
-                  </div>
+                <div className="grid gap-4 sm:grid-cols-3">
+                  {[
+                    { icon: Globe, title: 'Global sister circles' },
+                    { icon: Heart, title: 'Support and dua spaces' },
+                    { icon: ShieldCheck, title: 'Private-feeling trust' },
+                  ].map((item) => (
+                    <div key={item.title} className="rounded-[1.8rem] bg-slate-50 p-5 text-center">
+                      <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-rose-50 text-rose-600">
+                        <item.icon size={18} />
+                      </div>
+                      <div className="text-sm font-bold text-slate-700">{item.title}</div>
+                    </div>
+                  ))}
                 </div>
-                
-                <button 
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-brand-600 text-white py-5 rounded-[1.5rem] font-bold text-lg hover:bg-brand-700 transition-all shadow-xl shadow-brand-900/30 flex items-center justify-center gap-3 disabled:opacity-50 group"
-                >
-                  {loading ? (
-                    <Loader2 className="animate-spin" size={24} />
-                  ) : (
+
+                <AnimatePresence mode="wait">
+                  {error && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      className="rounded-[1.8rem] border border-rose-100 bg-rose-50 p-5 text-sm font-bold text-rose-600"
+                    >
+                      {error}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <form onSubmit={handleEmailAuth} className="space-y-5">
+                  {isLogin && (
                     <>
-                      {isLogin ? 'Sign In' : 'Create Account'} 
-                      <ArrowRight size={24} className="group-hover:translate-x-1 transition-transform" />
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Email Address</label>
+                        <div className="relative">
+                          <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                          <input
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="name@example.com"
+                            required
+                            className="w-full rounded-[1.5rem] border border-slate-200 bg-slate-50 py-4 pl-14 pr-5 font-medium text-slate-700 outline-none focus:border-rose-300"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Password</label>
+                          <button type="button" className="text-[10px] font-bold uppercase tracking-[0.18em] text-rose-600">
+                            Secure sign in
+                          </button>
+                        </div>
+                        <div className="relative">
+                          <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                          <input
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="Enter your password"
+                            required
+                            className="w-full rounded-[1.5rem] border border-slate-200 bg-slate-50 py-4 pl-14 pr-5 font-medium text-slate-700 outline-none focus:border-rose-300"
+                          />
+                        </div>
+                      </div>
                     </>
                   )}
-                </button>
-              </form>
 
-              <div className="text-center pt-4">
-                <button 
-                  onClick={() => setIsLogin(!isLogin)}
-                  className="text-slate-500 font-medium hover:text-brand-600 transition-colors group"
-                >
-                  {isLogin ? (
-                    <>New to FindIlm? <span className="text-brand-600 font-bold group-hover:underline">Sign Up Free</span></>
-                  ) : (
-                    <>Already have an account? <span className="text-brand-600 font-bold group-hover:underline">Sign In</span></>
+                  {!isLogin && signupStep === 2 && (
+                    <div className="rounded-[1.8rem] border border-emerald-100 bg-emerald-50 p-5 text-sm leading-relaxed text-emerald-800">
+                      Your onboarding focus is saved for this session and helps us shape a more intentional member experience.
+                    </div>
                   )}
-                </button>
+
+                  <button
+                    type="submit"
+                    disabled={loading || (!isLogin && signupStep !== 2)}
+                    className="flex w-full items-center justify-center gap-3 rounded-[1.7rem] bg-rose-600 py-5 text-lg font-bold text-white shadow-[0_18px_40px_rgba(225,29,72,0.22)] transition-all hover:bg-rose-700 disabled:opacity-50"
+                  >
+                    {loading ? (
+                      <Loader2 className="animate-spin" size={24} />
+                    ) : (
+                      <>
+                        {isLogin ? 'Enter The Platform' : 'Create My Account'}
+                        <ArrowRight size={22} />
+                      </>
+                    )}
+                  </button>
+                </form>
+
+                <div className="border-t border-slate-100 pt-6 text-center">
+                  <button
+                    onClick={() => {
+                      setIsLogin(!isLogin);
+                      setError(null);
+                      setSignupStep(1);
+                    }}
+                    className="font-medium text-slate-500 transition-colors hover:text-rose-600"
+                  >
+                    {isLogin ? (
+                      <>New here? <span className="font-bold text-rose-600">Create your member account</span></>
+                    ) : (
+                      <>Already part of the network? <span className="font-bold text-rose-600">Sign in</span></>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
           </div>

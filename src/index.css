@@ -1,10 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Amiri", serif;
-  --font-display: "Space Grotesk", sans-serif;
+  --font-display: "Cormorant Garamond", serif;
   
   --color-brand-50: #f0fdf4;
   --color-brand-100: #dcfce7;
@@ -20,8 +20,12 @@
 }
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
-    @apply bg-slate-50 text-slate-900 font-sans antialiased;
+    @apply bg-[linear-gradient(180deg,#fffdf9_0%,#fffaf7_32%,#f8fafc_100%)] text-slate-900 font-sans antialiased;
   }
   
   h1, h2, h3, h4, h5, h6 {
@@ -29,3 +33,12 @@
   }
 }
 
+@layer components {
+  .admin-input {
+    @apply w-full rounded-[1.4rem] border border-slate-200 bg-slate-50 px-4 py-3 text-slate-700 outline-none transition-all focus:border-rose-300;
+  }
+
+  .admin-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-[1.4rem] bg-slate-950 px-5 py-3 font-bold text-white transition-all hover:bg-slate-900 disabled:opacity-50;
+  }
+}

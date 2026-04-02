@@ -23,11 +23,11 @@ import {
   Instagram,
   Twitter,
   Facebook,
-  Youtube
+  Youtube,
+  LayoutDashboard
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '../AuthContext';
-import { auth, signOut } from '../firebase';
 
 interface LayoutProps {
   children: ReactNode;
@@ -38,7 +38,7 @@ export default function Layout({ children }: LayoutProps) {
   const [isDark, setIsDark] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
-  const { user, profile } = useAuth();
+  const { user, profile, isAdmin, logout } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -56,7 +56,7 @@ export default function Layout({ children }: LayoutProps) {
   ];
 
   const handleLogout = async () => {
-    await signOut(auth);
+    await logout();
   };
 
   return (
@@ -93,6 +93,19 @@ export default function Layout({ children }: LayoutProps) {
                     {item.name}
                   </Link>
                 ))}
+                {isAdmin && (
+                  <Link
+                    to="/admin-panel"
+                    className={`px-4 py-2 rounded-full text-sm font-bold transition-all flex items-center gap-2 ${
+                      location.pathname === '/admin-panel'
+                        ? 'bg-brand-50 text-brand-600'
+                        : 'text-slate-500 hover:text-brand-600 hover:bg-brand-50/50'
+                    }`}
+                  >
+                    <LayoutDashboard size={18} />
+                    Admin
+                  </Link>
+                )}
               </div>
             </div>
 
@@ -191,6 +204,22 @@ export default function Layout({ children }: LayoutProps) {
                     {item.name}
                   </Link>
                 ))}
+                {isAdmin && (
+                  <Link
+                    to="/admin-panel"
+                    onClick={() => setIsMenuOpen(false)}
+                    className={`flex items-center gap-4 p-5 rounded-2xl text-xl font-bold transition-all ${
+                      location.pathname === '/admin-panel'
+                        ? 'bg-brand-50 text-brand-600'
+                        : 'hover:bg-slate-50 text-slate-600'
+                    }`}
+                  >
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${location.pathname === '/admin-panel' ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-400'}`}>
+                      <LayoutDashboard size={24} />
+                    </div>
+                    Admin Panel
+                  </Link>
+                )}
               </div>
 
               <div className="pt-8 border-t space-y-4">

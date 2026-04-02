@@ -1,25 +1,26 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  Heart, 
-  Shield, 
-  Users, 
-  BookOpen, 
-  Video, 
-  MessageCircle, 
-  Sparkles, 
-  ArrowRight, 
-  Star,
-  Quote,
-  Loader2,
-  ShieldCheck,
-  Flower,
-  ChevronRight,
+import {
+  ArrowRight,
+  BookOpen,
   Bookmark,
-  Share2
+  ChevronRight,
+  Compass,
+  Flower,
+  Heart,
+  Loader2,
+  Quote,
+  Share2,
+  Shield,
+  ShieldCheck,
+  Sparkles,
+  Star,
+  Users,
+  Waves,
 } from 'lucide-react';
 import { ai, MODELS } from '../services/gemini';
 import ReactMarkdown from 'react-markdown';
+import { Link } from 'react-router-dom';
 
 export default function WomenSection() {
   const [advice, setAdvice] = useState<string | null>(null);
@@ -32,7 +33,7 @@ export default function WomenSection() {
     try {
       const response = await ai.models.generateContent({
         model: MODELS.FLASH,
-        contents: `Provide a compassionate, empowering, and authentic Islamic perspective for Muslim women on the topic of: "${topic}". 
+        contents: `Provide a compassionate, empowering, and authentic Islamic perspective for Muslim women on the topic of: "${topic}".
         Focus on:
         1. Spiritual growth and self-development.
         2. The high status and honor of women in Islam.
@@ -40,130 +41,177 @@ export default function WomenSection() {
         4. References from the Qur'an and Sunnah.
         Format in beautiful Markdown with clear headings and a gentle, encouraging tone.`,
       });
-      setAdvice(response.text || "No advice available.");
+      setAdvice(response.text || 'No advice available.');
     } catch (error) {
-      console.error("Advice error:", error);
-      setAdvice("Failed to retrieve guidance. Please try again.");
+      console.error('Advice error:', error);
+      setAdvice('Failed to retrieve guidance. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
   const categories = [
-    { title: "Hijab & Modesty", icon: Shield, color: "bg-emerald-50 text-emerald-600", border: "border-emerald-100" },
-    { title: "Marriage Guidance", icon: Heart, color: "bg-rose-50 text-rose-600", border: "border-rose-100" },
-    { title: "Women's Rights", icon: BookOpen, color: "bg-blue-50 text-blue-600", border: "border-blue-100" },
-    { title: "Personal Growth", icon: Star, color: "bg-amber-50 text-amber-600", border: "border-amber-100" },
+    { title: 'Marriage & Emotional Load', icon: Heart, color: 'bg-rose-50 text-rose-600' },
+    { title: 'Hijab, Modesty & Visibility', icon: Shield, color: 'bg-emerald-50 text-emerald-600' },
+    { title: 'Study, Work & Self-Development', icon: BookOpen, color: 'bg-amber-50 text-amber-600' },
+    { title: 'Identity, Confidence & Belonging', icon: Star, color: 'bg-indigo-50 text-indigo-600' },
+  ];
+
+  const sanctuaryColumns = [
+    {
+      title: 'What Women Need Here',
+      icon: Compass,
+      body: 'A place where discussion is not shallow, vulnerability is not exploited, and guidance is not reduced to slogans.',
+      items: ['Sensitive questions', 'Real-life pressures', 'Faith-centered perspective'],
+    },
+    {
+      title: 'What This Space Protects',
+      icon: ShieldCheck,
+      body: 'Adab, privacy, gentleness, and meaningful conversation should shape the atmosphere as much as the visuals do.',
+      items: ['Moderation', 'Respectful tone', 'Private-feeling trust'],
+    },
+  ];
+
+  const contentStreams = [
+    {
+      title: 'Marriage, family, and home life',
+      body: 'Not idealized language, but grounded content for women living real responsibilities and relational complexity.',
+    },
+    {
+      title: 'Identity in a digital world',
+      body: 'How to remain anchored to deen while navigating visibility, confidence, work, friendship, and online expectations.',
+    },
+    {
+      title: 'Quiet support and recovery',
+      body: 'Some sisters do not need performance. They need dua, softness, a private path back, and trustworthy companionship.',
+    },
   ];
 
   return (
-    <div className="max-w-7xl mx-auto space-y-16 pb-32">
-      {/* Hero Section */}
-      <section className="relative bg-rose-50 rounded-[4rem] p-12 md:p-24 overflow-hidden shadow-2xl shadow-rose-100/50 group">
-        <div className="absolute inset-0 z-0">
-          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-rose-200/30 rounded-full blur-[120px] -mr-64 -mt-64 animate-pulse" />
-          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-rose-300/20 rounded-full blur-[100px] -ml-48 -mb-48" />
+    <div className="max-w-7xl mx-auto space-y-20 pb-32">
+      <section className="relative overflow-hidden rounded-[4rem] bg-[linear-gradient(135deg,#fff6f8_0%,#fffdfa_52%,#f5fbf8_100%)] px-8 pb-16 pt-12 shadow-[0_45px_120px_-30px_rgba(15,23,42,0.16)] md:px-14 md:pb-24 md:pt-16">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(244,114,182,0.18),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.14),transparent_24%)]" />
+          <div className="absolute left-0 top-0 h-full w-full opacity-50 [background-image:linear-gradient(rgba(255,255,255,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.5)_1px,transparent_1px)] [background-size:80px_80px]" />
         </div>
 
-        <div className="relative z-10 flex flex-col lg:flex-row items-center gap-16">
-          <div className="flex-1 space-y-10">
-            <div className="inline-flex items-center gap-3 px-6 py-2 bg-rose-100 text-rose-600 rounded-full text-xs font-bold uppercase tracking-widest border border-rose-200">
+        <div className="relative z-10 grid grid-cols-1 gap-12 lg:grid-cols-[1.05fr_0.95fr]">
+          <div className="space-y-8">
+            <div className="inline-flex items-center gap-3 rounded-full border border-rose-200 bg-white/80 px-6 py-3 text-xs font-bold uppercase tracking-[0.22em] text-rose-600 shadow-lg shadow-rose-100/40 backdrop-blur-xl">
               <Flower size={16} />
-              Sisters' Sanctuary
+              The Sanctuary Layer
             </div>
-            <h2 className="text-5xl md:text-7xl font-display font-bold text-rose-950 leading-[1.1]">
-              Empowering the <br />
-              <span className="text-rose-600 italic">Muslimah Journey</span>
-            </h2>
-            <p className="text-rose-800/70 text-xl leading-relaxed max-w-xl font-medium">
-              A dedicated space for sisters to find authentic guidance, connect with a global community, and grow in their faith and character.
-            </p>
-            <div className="flex flex-wrap gap-6">
-              <button className="bg-rose-600 text-white px-12 py-5 rounded-[1.5rem] font-bold text-lg hover:bg-rose-700 transition-all shadow-xl shadow-rose-200 flex items-center gap-3 group/btn">
-                Join Sisters' Forum
-                <ArrowRight size={24} className="group-hover:translate-x-1 transition-transform" />
-              </button>
-              <button className="bg-white text-rose-600 border border-rose-200 px-12 py-5 rounded-[1.5rem] font-bold text-lg hover:bg-rose-50 transition-all shadow-lg shadow-rose-100">
-                Explore Resources
-              </button>
+
+            <div className="space-y-5">
+              <h2 className="max-w-4xl text-5xl font-display font-bold leading-[0.94] text-slate-950 md:text-7xl">
+                The women’s space should feel{' '}
+                <span className="bg-gradient-to-r from-rose-600 via-fuchsia-500 to-emerald-500 bg-clip-text text-transparent italic">
+                  protective, intelligent, and deeply human
+                </span>
+              </h2>
+              <p className="max-w-2xl text-xl leading-relaxed text-slate-600">
+                This is where the site becomes a real platform for Muslim women. Not decorative “female branding,” but a
+                meaningful environment for support, growth, and discussion with dignity.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-4">
+              <Link
+                to="/community"
+                className="group inline-flex items-center gap-3 rounded-[1.8rem] bg-slate-950 px-10 py-5 text-lg font-bold text-white shadow-[0_18px_50px_rgba(15,23,42,0.25)] transition-all hover:bg-slate-900"
+              >
+                Join Discussion Circles
+                <ArrowRight size={22} className="transition-transform group-hover:translate-x-1" />
+              </Link>
+              <Link
+                to="/dua"
+                className="inline-flex items-center gap-3 rounded-[1.8rem] border border-white/80 bg-white/78 px-10 py-5 text-lg font-bold text-slate-800 shadow-lg shadow-slate-200/40 backdrop-blur-xl transition-all hover:border-rose-200 hover:bg-rose-50/60"
+              >
+                Offer Or Request Support
+              </Link>
             </div>
           </div>
-          
-          <div className="flex-1 relative hidden lg:block">
-            <div className="relative z-10 w-full aspect-square bg-white/40 backdrop-blur-xl rounded-[4rem] border border-white/60 shadow-2xl flex items-center justify-center p-12">
-              <div className="w-full h-full bg-rose-600/10 rounded-[3rem] flex items-center justify-center relative overflow-hidden group/img">
-                <Users size={180} className="text-rose-400 group-hover/img:scale-110 transition-transform duration-700" />
-                <div className="absolute inset-0 bg-gradient-to-t from-rose-600/20 to-transparent" />
-              </div>
-            </div>
-            {/* Floating Badges */}
-            <motion.div 
-              animate={{ y: [0, -20, 0] }}
-              transition={{ duration: 4, repeat: Infinity }}
-              className="absolute -top-6 -right-6 bg-white p-6 rounded-[2rem] shadow-2xl border border-rose-50 flex items-center gap-4 z-20"
-            >
-              <div className="w-12 h-12 bg-rose-50 rounded-xl flex items-center justify-center text-rose-600">
-                <Heart size={24} fill="currentColor" />
-              </div>
-              <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Community</p>
-                <p className="text-lg font-bold text-slate-900">12k+ Sisters</p>
-              </div>
-            </motion.div>
+
+          <div className="grid gap-6">
+            {sanctuaryColumns.map((column, idx) => (
+              <motion.div
+                key={column.title}
+                initial={{ opacity: 0, y: 18 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: idx * 0.08 }}
+                className="rounded-[2.8rem] border border-white/80 bg-white/76 p-8 shadow-xl shadow-slate-200/30 backdrop-blur-xl"
+              >
+                <div className="mb-6 flex items-center gap-4">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-50 text-rose-600">
+                    <column.icon size={26} />
+                  </div>
+                  <h3 className="text-2xl font-bold text-slate-900">{column.title}</h3>
+                </div>
+                <p className="leading-relaxed text-slate-600">{column.body}</p>
+                <div className="mt-6 flex flex-wrap gap-3">
+                  {column.items.map((item) => (
+                    <span key={item} className="rounded-full bg-slate-50 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500">
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* AI Guidance Section */}
-      <section className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-        <div className="lg:col-span-5 space-y-10">
+      <section className="grid grid-cols-1 gap-12 lg:grid-cols-12">
+        <div className="lg:col-span-5 space-y-8">
           <div className="space-y-4">
-            <h3 className="text-4xl font-display font-bold text-slate-900 flex items-center gap-4">
-              <div className="w-12 h-12 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-600 shadow-sm">
+            <h3 className="flex items-center gap-4 text-4xl font-display font-bold text-slate-900">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 shadow-sm">
                 <Sparkles size={28} />
               </div>
-              Divine Guidance
+              Advanced Guidance Layer
             </h3>
-            <p className="text-slate-500 text-lg font-medium leading-relaxed">
-              Select a topic to receive a compassionate Islamic perspective tailored specifically for the modern Muslimah.
+            <p className="text-lg font-medium leading-relaxed text-slate-500">
+              Let women explore serious themes with a tone that is useful, literate, and emotionally aware.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-4">
-            {categories.map((cat, idx) => (
+          <div className="grid gap-4">
+            {categories.map((cat) => (
               <button
-                key={idx}
+                key={cat.title}
                 onClick={() => getAdvice(cat.title)}
-                className={`flex items-center justify-between p-6 rounded-[2rem] border-2 transition-all group text-left ${
-                  activeTopic === cat.title 
-                    ? 'bg-rose-50 border-rose-500 shadow-xl shadow-rose-100' 
-                    : 'bg-white border-slate-100 hover:border-rose-200 hover:bg-rose-50/50'
+                className={`flex items-center justify-between rounded-[2rem] border-2 p-6 text-left transition-all ${
+                  activeTopic === cat.title
+                    ? 'border-rose-500 bg-rose-50 shadow-xl shadow-rose-100'
+                    : 'border-slate-100 bg-white hover:border-rose-200 hover:bg-rose-50/50'
                 }`}
               >
                 <div className="flex items-center gap-5">
-                  <div className={`w-14 h-14 ${cat.color} rounded-2xl flex items-center justify-center shrink-0 shadow-sm group-hover:scale-110 transition-transform`}>
+                  <div className={`flex h-14 w-14 items-center justify-center rounded-2xl shadow-sm ${cat.color}`}>
                     <cat.icon size={28} />
                   </div>
-                  <span className={`text-xl font-bold transition-colors ${activeTopic === cat.title ? 'text-rose-600' : 'text-slate-700 group-hover:text-rose-600'}`}>
+                  <span className={`text-xl font-bold ${activeTopic === cat.title ? 'text-rose-600' : 'text-slate-700'}`}>
                     {cat.title}
                   </span>
                 </div>
-                <ChevronRight size={24} className={`transition-all ${activeTopic === cat.title ? 'text-rose-600 translate-x-1' : 'text-slate-300 group-hover:text-rose-400'}`} />
+                <ChevronRight size={24} className={activeTopic === cat.title ? 'text-rose-600' : 'text-slate-300'} />
               </button>
             ))}
           </div>
         </div>
 
         <div className="lg:col-span-7">
-          <div className="bg-white border border-slate-200 rounded-[4rem] p-10 md:p-16 shadow-2xl shadow-slate-200/50 relative overflow-hidden min-h-[500px] flex flex-col">
+          <div className="relative flex min-h-[560px] flex-col overflow-hidden rounded-[4rem] border border-slate-200 bg-white p-10 shadow-[0_30px_90px_rgba(15,23,42,0.12)] md:p-16">
+            <div className="absolute right-0 top-0 h-44 w-44 rounded-full bg-rose-100/60 blur-[90px]" />
             <AnimatePresence mode="wait">
               {loading ? (
-                <motion.div 
+                <motion.div
                   key="loading"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="flex-1 flex flex-col items-center justify-center space-y-6"
+                  className="flex flex-1 flex-col items-center justify-center space-y-6"
                 >
                   <div className="relative">
                     <Loader2 className="animate-spin text-rose-600" size={64} />
@@ -171,58 +219,64 @@ export default function WomenSection() {
                       <Flower size={24} className="text-rose-400" />
                     </div>
                   </div>
-                  <p className="text-slate-400 font-bold tracking-widest uppercase text-xs animate-pulse">Consulting Sacred Sources...</p>
+                  <p className="animate-pulse text-xs font-bold uppercase tracking-widest text-slate-400">
+                    Gathering thoughtful guidance...
+                  </p>
                 </motion.div>
               ) : advice ? (
-                <motion.div
-                  key="advice"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="flex-1 space-y-10"
-                >
+                <motion.div key="advice" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} className="relative z-10 flex-1 space-y-10">
                   <div className="flex items-center justify-between border-b border-slate-100 pb-8">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-600">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-50 text-rose-600">
                         <Quote size={28} />
                       </div>
                       <div>
-                        <h4 className="text-xl font-bold text-slate-900">Spiritual Reflection</h4>
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Topic: {activeTopic}</p>
+                        <h4 className="text-xl font-bold text-slate-900">Muslimah Reflection</h4>
+                        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">Topic: {activeTopic}</p>
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <button className="p-3 bg-slate-50 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all">
+                      <button className="rounded-xl bg-slate-50 p-3 text-slate-400 transition-all hover:bg-rose-50 hover:text-rose-600">
                         <Bookmark size={20} />
                       </button>
-                      <button className="p-3 bg-slate-50 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all">
+                      <button className="rounded-xl bg-slate-50 p-3 text-slate-400 transition-all hover:bg-rose-50 hover:text-rose-600">
                         <Share2 size={20} />
                       </button>
                     </div>
                   </div>
-                  
-                  <div className="prose prose-lg prose-rose max-w-none font-medium leading-relaxed text-slate-700">
+
+                  <div className="prose prose-lg max-w-none font-medium leading-relaxed text-slate-700">
                     <ReactMarkdown>{advice}</ReactMarkdown>
                   </div>
-                  
-                  <div className="pt-8 border-t border-slate-100 flex items-center gap-3 text-xs text-slate-400 italic">
+
+                  <div className="flex items-center gap-3 border-t border-slate-100 pt-8 text-xs italic text-slate-400">
                     <ShieldCheck size={16} className="text-rose-500" />
-                    Guidance provided is based on authentic Islamic principles and scholarly consensus.
+                    Guidance should remain compassionate, dignified, and rooted in authentic Islamic principles.
                   </div>
                 </motion.div>
               ) : (
-                <motion.div 
-                  key="empty"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="flex-1 flex flex-col items-center justify-center text-center space-y-8"
-                >
-                  <div className="w-32 h-32 bg-rose-50 rounded-[2.5rem] flex items-center justify-center text-rose-200 shadow-inner">
-                    <Sparkles size={64} />
+                <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="relative z-10 flex flex-1 flex-col justify-between">
+                  <div className="grid gap-5 md:grid-cols-2">
+                    {[
+                      ['Private circles', 'For questions women may never ask in open comment sections'],
+                      ['Faith and emotion together', 'A platform can be spiritually serious without becoming cold'],
+                      ['Real-life topics', 'Marriage, modesty, burnout, confidence, friendship, and home'],
+                      ['A gentler internet', 'The point is not virality. The point is nourishment'],
+                    ].map(([title, body]) => (
+                      <div key={title} className="rounded-[2rem] bg-slate-50 p-5">
+                        <p className="text-lg font-bold text-slate-900">{title}</p>
+                        <p className="mt-2 leading-relaxed text-slate-500">{body}</p>
+                      </div>
+                    ))}
                   </div>
-                  <div className="space-y-4 max-w-sm">
-                    <h4 className="text-2xl font-bold text-slate-900">Ready to Guide You</h4>
-                    <p className="text-slate-500 text-lg font-medium leading-relaxed">
-                      Select a category on the left to receive personalized, compassionate Islamic guidance for your journey.
+
+                  <div className="mt-10 text-center">
+                    <div className="mx-auto flex h-28 w-28 items-center justify-center rounded-[2.5rem] bg-rose-50 text-rose-200 shadow-inner">
+                      <Waves size={56} />
+                    </div>
+                    <h4 className="mt-6 text-3xl font-bold text-slate-900">Choose a topic to begin</h4>
+                    <p className="mx-auto mt-4 max-w-md text-lg leading-relaxed text-slate-500">
+                      Use this panel for nuanced guidance on themes that matter deeply to Muslim women living real lives today.
                     </p>
                   </div>
                 </motion.div>
@@ -232,98 +286,34 @@ export default function WomenSection() {
         </div>
       </section>
 
-      {/* Featured Content */}
-      <section className="space-y-12">
-        <div className="flex flex-col md:flex-row justify-between items-end gap-6">
-          <div className="space-y-2">
-            <h3 className="text-4xl font-display font-bold text-slate-900">Curated for You</h3>
-            <p className="text-slate-500 text-lg">In-depth articles and videos exploring the roles and legacy of women in Islam.</p>
+      <section className="grid grid-cols-1 gap-8 lg:grid-cols-[0.92fr_1.08fr]">
+        <div className="rounded-[4rem] bg-slate-950 p-10 text-white shadow-[0_35px_90px_rgba(15,23,42,0.2)] md:p-14">
+          <div className="space-y-5">
+            <div className="inline-flex items-center gap-2 rounded-full border border-rose-500/20 bg-rose-500/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-rose-300">
+              <Users size={14} />
+              The Culture Of The Space
+            </div>
+            <h3 className="text-5xl font-display font-bold leading-[1.02]">A real women’s platform is shaped by atmosphere as much as by features</h3>
+            <p className="text-xl leading-relaxed text-slate-400">
+              The tone should communicate dignity, emotional intelligence, trust, and a deeper kind of online companionship.
+            </p>
           </div>
-          <button className="text-rose-600 font-bold text-sm flex items-center gap-2 group">
-            View All Content <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
-          </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-          {[
-            { title: "The Legacy of Khadija (RA)", category: "Seerah", image: "https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&q=80&w=600", time: "8 min read" },
-            { title: "Balancing Career & Deen", category: "Modern Life", image: "https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?auto=format&fit=crop&q=80&w=600", time: "12 min read" },
-            { title: "Modesty in the Digital Age", category: "Hijab", image: "https://images.unsplash.com/photo-1542810634-71277d95dcbb?auto=format&fit=crop&q=80&w=600", time: "6 min read" },
-          ].map((item, idx) => (
+        <div className="grid gap-6">
+          {contentStreams.map((stream, idx) => (
             <motion.div
-              key={idx}
-              initial={{ opacity: 0, y: 20 }}
+              key={stream.title}
+              initial={{ opacity: 0, y: 18 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: idx * 0.1 }}
-              whileHover={{ y: -12 }}
-              className="bg-white border border-slate-200 rounded-[3rem] overflow-hidden shadow-xl shadow-slate-200/50 hover:border-rose-500 transition-all group"
+              transition={{ delay: idx * 0.08 }}
+              className="rounded-[2.8rem] border border-slate-200 bg-white p-8 shadow-xl shadow-slate-200/35"
             >
-              <div className="relative h-64 overflow-hidden">
-                <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" referrerPolicy="no-referrer" />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent" />
-                <div className="absolute top-6 left-6 bg-white/90 backdrop-blur-md px-4 py-2 rounded-full text-[10px] font-bold text-rose-600 uppercase tracking-widest">
-                  {item.category}
-                </div>
-              </div>
-              <div className="p-10 space-y-6">
-                <h4 className="text-2xl font-bold text-slate-900 group-hover:text-rose-600 transition-colors leading-tight">{item.title}</h4>
-                <div className="flex items-center justify-between pt-6 border-t border-slate-100">
-                  <div className="flex items-center gap-4 text-slate-400 text-xs font-bold uppercase tracking-widest">
-                    <span className="flex items-center gap-2"><BookOpen size={16} className="text-rose-500" /> {item.time}</span>
-                  </div>
-                  <div className="w-12 h-12 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-600 group-hover:bg-rose-600 group-hover:text-white transition-all">
-                    <ChevronRight size={24} />
-                  </div>
-                </div>
-              </div>
+              <h3 className="text-2xl font-bold text-slate-900">{stream.title}</h3>
+              <p className="mt-3 text-lg leading-relaxed text-slate-500">{stream.body}</p>
             </motion.div>
           ))}
-        </div>
-      </section>
-
-      {/* Community Section */}
-      <section className="bg-slate-900 text-white rounded-[4rem] p-12 md:p-24 shadow-2xl relative overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-rose-600/10 to-transparent pointer-events-none" />
-        </div>
-        
-        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-          <div className="space-y-10">
-            <div className="space-y-4">
-              <h3 className="text-5xl font-display font-bold leading-tight">Sisters' <br /> <span className="text-rose-400 italic">Discussion Forum</span></h3>
-              <p className="text-slate-400 text-xl leading-relaxed max-w-md">
-                Connect with a global community of sisters. Share experiences, ask questions, and support each other in a safe, moderated environment.
-              </p>
-            </div>
-            
-            <div className="space-y-6">
-              {[
-                { title: "Marriage & Family", count: "124 active discussions", icon: Heart, color: "bg-rose-600" },
-                { title: "Sisters' Halaqahs", count: "Find local events near you", icon: Users, color: "bg-emerald-600" }
-              ].map((forum, i) => (
-                <div key={i} className="flex items-center gap-6 bg-white/5 backdrop-blur-xl p-6 rounded-[2rem] border border-white/10 hover:bg-white/10 transition-all cursor-pointer group">
-                  <div className={`w-14 h-14 ${forum.color} rounded-2xl flex items-center justify-center shrink-0 shadow-lg group-hover:scale-110 transition-transform`}>
-                    <forum.icon size={28} />
-                  </div>
-                  <div>
-                    <h4 className="text-xl font-bold text-white">{forum.title}</h4>
-                    <p className="text-sm text-slate-500 font-medium">{forum.count}</p>
-                  </div>
-                  <ChevronRight size={24} className="ml-auto text-white/20 group-hover:text-white transition-colors" />
-                </div>
-              ))}
-            </div>
-          </div>
-          
-          <div className="relative aspect-square bg-rose-600/5 rounded-full flex items-center justify-center p-16 border border-rose-500/10">
-            <div className="w-full h-full bg-rose-600/10 rounded-full flex items-center justify-center relative group">
-              <MessageCircle size={160} className="text-rose-500/40 group-hover:scale-110 transition-transform duration-1000" />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-32 h-32 bg-rose-600 rounded-full blur-3xl opacity-20 animate-pulse" />
-              </div>
-            </div>
-          </div>
         </div>
       </section>
     </div>

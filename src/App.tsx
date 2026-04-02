@@ -14,6 +14,7 @@ import Courses from './components/Courses';
 import AudioPodcasts from './components/AudioPodcasts';
 import WomenSection from './components/WomenSection';
 import RevertSupport from './components/RevertSupport';
+import AdminPanel from './components/AdminPanel';
 
 export default function App() {
   return (
@@ -34,6 +35,7 @@ export default function App() {
             <Route path="/community" element={<Community />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/assistant" element={<Assistant />} />
+            <Route path="/admin-panel" element={<AdminPanel />} />
           </Routes>
         </Layout>
       </AuthProvider>
